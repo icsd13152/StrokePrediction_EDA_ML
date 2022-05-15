@@ -44,7 +44,7 @@ app.layout = html.Div([
                          dcc.Input(
                              type="number",
                              debounce=True,
-                             value='55',
+                             value='1',
                              id='age'
                          )
                      ]), width={"size": 3}),
@@ -77,7 +77,7 @@ app.layout = html.Div([
                                  {'label': 'Female', 'value': '0'},
                                  {'label': 'Male', 'value': '1'}
                              ],
-                             value='0',
+                             value='1',
                              id='sex_male'
                          )
                      ]), width={"size": 3}),
@@ -90,18 +90,26 @@ app.layout = html.Div([
                          dcc.Input(
                              type="number",
                              debounce=True,
-                             value='132',
+                             value='0',
                              id='resting_bp'
                          )
                      ]), width={"size": 3}, style={'padding': '10px 10px'}),
                      dbc.Col(html.Div([
                          html.Label('hypertension: '),
-                         dcc.Input(
-                             type="number",
-                             debounce=True,
-                             value='151',
+                         dcc.Dropdown(
+                             options=[
+                                 {'label': 'Yes', 'value': '1'},
+                                 {'label': 'No', 'value': '0'}
+                             ],
+                             value='0',
                              id='maximum_hr'
                          )
+                         # dcc.Input(
+                         #     type="number",
+                         #     debounce=True,
+                         #     value='0',
+                         #
+                         # )
                      ]), width={"size": 3}, style={'padding': '10px 10px'}),
                      dbc.Col(html.Div([
                          html.Label('heart_disease: '),
@@ -131,12 +139,13 @@ app.layout = html.Div([
                          html.Label('Work Type: '),
                          dcc.Dropdown(
                              options=[
-                                 {'label': 'Asymptomatic', 'value': '0'},
-                                 {'label': 'Angina', 'value': '1'},
-                                 {'label': 'Non-anginal', 'value': '2'},
-                                 {'label': 'Non-anginal', 'value': '3'}
+                                 {'label': 'Private', 'value': '0'},
+                                 {'label': 'Self-employed', 'value': '1'},
+                                 {'label': 'Govt-job', 'value': '2'},
+                                 {'label': 'children', 'value': '3'},
+                                 {'label': 'Never-worked', 'value': '4'}
                              ],
-                             value='0',
+                             value='4',
                              id='work_type'
                          )
                      ]), width={"size": 3}),
@@ -144,27 +153,27 @@ app.layout = html.Div([
                          html.Label('Smoking Status: '),
                          dcc.Dropdown(
                              options=[
-                                 {'label': 'xx', 'value': '0'},
-                                 {'label': 'xx2', 'value': '1'},
-                                 {'label': 'x', 'value': '2'},
-                                 {'label': 'g', 'value': '3'}
+                                 {'label': 'formerly smoked', 'value': '0'},
+                                 {'label': 'never smoked', 'value': '1'},
+                                 {'label': 'smokes', 'value': '2'},
+                                 {'label': 'Unknown', 'value': '3'}
                              ],
-                             value='0',
+                             value='3',
                              id='smoke_status'
                          )
                      ]), width={"size": 3}),
                  ], style={'padding': '10px 25px'}),
-                 dbc.Row([html.Div("ECG results",
+                 dbc.Row([html.Div("Other Info",
                                    style={'font-weight': 'bold', 'font-size': 16, 'padding': '10px 25px'})]),
                  dbc.Row([
                      dbc.Col(html.Div([
                          html.Label('Residence Type: '),
                          dcc.Dropdown(
                              options=[
-                                 {'label': 'Normal', 'value': '0'},
-                                 {'label': 'Not normal', 'value': '1'}
+                                 {'label': 'Urban', 'value': '1'},
+                                 {'label': 'Rural', 'value': '0'}
                              ],
-                             value='0',
+                             value='1',
                              id='res_type'
                          )
                      ]), width={"size": 3}),
@@ -270,6 +279,7 @@ def predict_hd_summary(data_patient):
 
     # read in data and predict likelihood of heart disease
     x_new = pd.read_json(data_patient)
+    print(x_new)
     pred = hdpred_model.predict(x_new)
     print(pred)
     y_val = hdpred_model.predict_proba(x_new)[:,1]*100
@@ -280,9 +290,9 @@ def predict_hd_summary(data_patient):
     text_val = str(np.round(y_val, 1)) + "%"
     print(text_val)
     # assign a risk group
-    if y_val/100 <= 0.275685:
+    if y_val/100 <= 0.28:
         risk_grp = 'low risk'
-    elif y_val/100 <= 0.795583:
+    elif y_val/100 <= 0.77:
         risk_grp = 'medium risk'
     else:
         risk_grp = 'high risk'
