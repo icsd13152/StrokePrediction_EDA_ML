@@ -258,7 +258,7 @@ def generate_feature_matrix(res_type,glucose_lvl, resting_bp, married,sex_male,a
 
 
 
-    values = [sex_male,age,maximum_hr,ht,married,work_type,res_type,glucose_lvl, resting_bp,smoke_status]
+    values = [int(sex_male),int(age),int(maximum_hr),int(ht),int(married),int(work_type),int(res_type),float(glucose_lvl), float(resting_bp),int(smoke_status)]
 
     x_patient = pd.DataFrame(data=[values],
                              columns=column_names,
