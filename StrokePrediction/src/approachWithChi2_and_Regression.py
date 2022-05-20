@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 
 dataOriginal = pd.read_csv('../Dataset/healthcare-dataset-stroke-data.csv')
 dataOriginal.head(10)
-
+dataOriginal.drop(['id'], axis=1, inplace=True)
 lr = LinearRegression()
 datanew = dataOriginal[['age', 'ever_married', 'smoking_status','avg_glucose_level','bmi']].copy()
 

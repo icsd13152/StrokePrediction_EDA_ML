@@ -9,7 +9,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
-
+from sklearn import *
 import plotly.graph_objs as go
 import shap
 
@@ -18,7 +18,7 @@ import joblib
 
 # Load model
 current_folder = os.path.dirname(__file__)
-hd_model_obj = joblib.load('GB.sav')
+hd_model_obj = joblib.load('./models/WithoutChi2/RF_RERG_NoChi2.sav')
 
 hdpred_model = hd_model_obj
 hd_pipeline = []

@@ -51,7 +51,7 @@ def FillWithLR(dataOriginal):
 
     return data
 data = FillWithLR(dataOriginal)
-
+data.drop(['id'], axis=1, inplace=True)
 data['gender']=data['gender'].apply(lambda x: 1 if x=='Male' else 0)
 data['ever_married']=data['ever_married'].apply(lambda x: 1 if x=='Yes' else 0)
 data['Residence_type']=data['Residence_type'].apply(lambda x: 1 if x=='Urban' else 0)
