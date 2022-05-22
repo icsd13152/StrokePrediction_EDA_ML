@@ -18,8 +18,8 @@ import joblib
 
 # Load model
 current_folder = os.path.dirname(__file__)
-hd_model_obj = joblib.load('./models/WithoutChi2/RF_RERG_NoChi2.sav')
-
+hd_model_obj = joblib.load('./models/WithoutChi2/GB_BMI_NoChi2.sav')
+scaler = joblib.load('./models/WithoutChi2/scaler_BMI_NoChi2.sav')
 hdpred_model = hd_model_obj
 hd_pipeline = []
 
@@ -279,16 +279,19 @@ def predict_hd_summary(data_patient):
 
     # read in data and predict likelihood of heart disease
     x_new = pd.read_json(data_patient)
-    print(x_new)
-    pred = hdpred_model.predict(x_new)
+    x_new2 = scaler.transform(x_new)
+    print(x_new2)
+    pred = hdpred_model.predict(x_new2)
     print(pred)
-    y_val = hdpred_model.predict_proba(x_new)[:,1]*100
+    y_val = hdpred_model.predict_proba(x_new2)[:,1]*100
     print(y_val)
-    print(hdpred_model.predict_proba(x_new)*100)
+    print(hdpred_model.predict_proba(x_new2)*100)
     # maxiY = np.argmax(y_val)
     # y = y_val[maxiY]*100
     text_val = str(np.round(y_val, 1)) + "%"
     print(text_val)
+
+    # print(x_new2)
     # assign a risk group
     if y_val/100 <= 0.28:
         risk_grp = 'low risk'
@@ -382,7 +385,7 @@ def predict_hd_summary(data_patient):
     fig1.update_layout(margin=dict(l=0, r=50, t=10, b=10), xaxis={'range': [0, 100]})
     # do shap value calculations for basic waterfall plot
     explainer_patient = shap.TreeExplainer(hdpred_model)
-    shap_values_patient = explainer_patient.shap_values(x_new)
+    shap_values_patient = explainer_patient.shap_values(x_new2)
 
     updated_fnames = x_new.T.reset_index()
 
@@ -482,7 +485,8 @@ def predict_hd_summary(data_patient):
         showarrow=False,
         font=dict(color="black", size=14)
     )
-
+    x_new2 = pd.DataFrame()
+    x_new = pd.DataFrame()
     return fig1, \
            f"Based on the patient's profile, the predicted likelihood of Stroke is {text_val}. " \
            f"This patient is in the {risk_grp} group.", \

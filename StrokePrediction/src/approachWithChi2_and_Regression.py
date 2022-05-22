@@ -12,8 +12,9 @@ from sklearn.feature_selection import SelectKBest, chi2
 # !pip install missingno
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 dataOriginal = pd.read_csv('../Dataset/healthcare-dataset-stroke-data.csv')
 dataOriginal.head(10)
@@ -96,6 +97,11 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 
 print("train: ",X_train.shape)
 print("val: ",X_val.shape)
 print("test: ",X_test.shape)
+
+scaler = MinMaxScaler()#StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+X_val = scaler.transform(X_val)
 
 X_names = Xorig.columns.values
 print(X_names)
@@ -213,7 +219,7 @@ X_test=StatisticalTest.fit_transform(X_test, y_test)
 
 #=============== Training START =====================
 
-clf2_regre_chi2 = naive_bayes.ComplementNB(alpha = 1e-05).fit(X_new,y_train)
+clf2_regre_chi2 = naive_bayes.ComplementNB(alpha = 9.50001).fit(X_new,y_train)
 y_pred2 = clf2_regre_chi2.predict(X_val_new)
 predicted_prob2 = clf2_regre_chi2.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred2)
@@ -249,7 +255,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 
 #================================================================================
-clf3_regre_chi2 = LogisticRegression(solver='newton-cg',C=10,max_iter=200).fit(X_new,y_train)
+clf3_regre_chi2 = LogisticRegression(solver='newton-cg',C=1.1,max_iter=200).fit(X_new,y_train)
 y_pred3 = clf3_regre_chi2.predict(X_val_new)
 predicted_prob3 = clf3_regre_chi2.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred3)
@@ -266,7 +272,7 @@ plt.xlabel('Predicted values', fontsize = 20)
 plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
-clf_regre_chi2 = GradientBoostingClassifier(n_estimators=500, learning_rate=1, loss = 'exponential', max_depth=10).fit(X_new, y_train)
+clf_regre_chi2 = GradientBoostingClassifier(n_estimators=200, learning_rate=0.1, loss = 'exponential', max_depth=10).fit(X_new, y_train)
 y_pred = clf_regre_chi2.predict(X_val_new)
 predicted_prob = clf_regre_chi2.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -284,7 +290,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
 
-forest_regre_chi2 = RandomForestClassifier(n_estimators = 200).fit(X_new,y_train)
+forest_regre_chi2 = RandomForestClassifier(n_estimators = 100).fit(X_new,y_train)
 y_pred4 = forest_regre_chi2.predict(X_val_new)
 predicted_prob4 = forest_regre_chi2.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred4)
@@ -319,7 +325,7 @@ for clf, label in zip([clf1_regre_chi2, clf2_regre_chi2,clf3_regre_chi2,clf_regr
           % (scores2Test.mean(), scores2Test.std(), label))
 
 # ================= Training END =====================================
-
+scalerName = './models/WithChi2/scaler_REGR_Chi2.sav'
 filenameLR_REGR_Chi2 = './models/WithChi2/LR_REGR_Chi2.sav'
 filenameSVM_REGR_Chi2 = './models/WithChi2/SVM_REGR_Chi2.sav'
 filenameRF_REGR_Chi2 = './models/WithChi2/RF_REGR_Chi2.sav'
@@ -330,3 +336,4 @@ joblib.dump(clf1_regre_chi2, filenameSVM_REGR_Chi2)
 joblib.dump(forest_regre_chi2, filenameRF_REGR_Chi2)
 joblib.dump(clf_regre_chi2, filenameGB_REGR_Chi2)
 joblib.dump(clf2_regre_chi2, filenameNB_REGR_Chi2)
+joblib.dump(scaler, scalerName)

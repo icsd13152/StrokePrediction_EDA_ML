@@ -11,6 +11,7 @@ from sklearn import naive_bayes, svm,metrics
 from sklearn.model_selection import GridSearchCV,cross_val_score
 from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import joblib
 
 
@@ -69,6 +70,10 @@ print("train: ",X_train.shape)
 print("val: ",X_val.shape)
 print("test: ",X_test.shape)
 
+scaler = MinMaxScaler()#StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+X_val = scaler.transform(X_val)
 X_names = Xorig.columns.values
 print(X_names)
 p_value_limit = 0.98
@@ -164,7 +169,7 @@ X_test=StatisticalTest.fit_transform(X_test, y_test)
 # # print classification report
 # print(metrics.classification_report(y_val, grid_predictions))
 #
-# param_grid = {'C':[0.01,0.1,1,1.2,1.5,10,100,1000,2000],
+# param_grid = {'C':[0.01,0.1,1,1.2,1.5,10,100,1000],
 #               'kernel':['rbf'],
 #               'gamma':['scale','auto']
 #
@@ -185,7 +190,7 @@ X_test=StatisticalTest.fit_transform(X_test, y_test)
 
 #=============== Training START =====================
 
-clf2_chi2_mean = naive_bayes.ComplementNB(alpha = 1e-05).fit(X_new,y_train)
+clf2_chi2_mean = naive_bayes.ComplementNB(alpha = 9.80001).fit(X_new,y_train)
 y_pred2 = clf2_chi2_mean.predict(X_val_new)
 predicted_prob2 = clf2_chi2_mean.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred2)
@@ -203,7 +208,7 @@ plt.xlabel('Predicted values', fontsize = 20)
 plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
-clf1_chi2_mean = svm.SVC(kernel='rbf',C=10,gamma='auto',probability=True).fit(X_new,y_train)
+clf1_chi2_mean = svm.SVC(kernel='rbf',C=1000,gamma='scale',probability=True).fit(X_new,y_train)
 y_pred = clf1_chi2_mean.predict(X_val_new)
 predicted_prob1 = clf1_chi2_mean.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -238,7 +243,7 @@ plt.xlabel('Predicted values', fontsize = 20)
 plt.ylabel('True values', fontsize = 20)
 plt.show()
 # ================================================================================
-clf_chi2_mean = GradientBoostingClassifier(n_estimators=500, learning_rate=0.1, loss = 'exponential', max_depth=10).fit(X_new, y_train)
+clf_chi2_mean = GradientBoostingClassifier(n_estimators=300, learning_rate=0.1, loss = 'exponential', max_depth=10).fit(X_new, y_train)
 y_pred = clf_chi2_mean.predict(X_val_new)
 predicted_prob = clf_chi2_mean.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -256,7 +261,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
 
-forest_chi2_mean = RandomForestClassifier(n_estimators = 200).fit(X_new,y_train)
+forest_chi2_mean = RandomForestClassifier(n_estimators = 50).fit(X_new,y_train)
 y_pred4 = forest_chi2_mean.predict(X_val_new)
 predicted_prob4 = forest_chi2_mean.predict_proba(X_val_new)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred4)
@@ -293,6 +298,7 @@ for clf, label in zip([clf1_chi2_mean, clf2_chi2_mean,clf3_chi2_mean,clf_chi2_me
 # ================= Training END =====================================
 
 ''' Save Models '''
+scalerName = './models/WithChi2/scaler_BMI_Chi2.sav'
 filenameLR_BMI_Chi2 = './models/WithChi2/LR_BMI_Chi2.sav'
 filenameSVM_BMI_Chi2 = './models/WithChi2/SVM_BMI_Chi2.sav'
 filenameRF_BMI_Chi2 = './models/WithChi2/RF_BMI_Chi2.sav'
@@ -303,3 +309,4 @@ joblib.dump(clf1_chi2_mean, filenameSVM_BMI_Chi2)
 joblib.dump(forest_chi2_mean, filenameRF_BMI_Chi2)
 joblib.dump(clf_chi2_mean, filenameGB_BMI_Chi2)
 joblib.dump(clf2_chi2_mean, filenameNB_BMI_Chi2)
+joblib.dump(scaler, scalerName)

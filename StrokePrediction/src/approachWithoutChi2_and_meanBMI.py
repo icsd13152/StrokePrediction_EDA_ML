@@ -9,6 +9,7 @@ from sklearn.model_selection import GridSearchCV,cross_val_score
 from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import SMOTE
 import joblib
+from sklearn.preprocessing import MinMaxScaler
 
 dataOriginal = pd.read_csv('../Dataset/healthcare-dataset-stroke-data.csv')
 dataOriginal.head(10)
@@ -60,7 +61,10 @@ print("Total: ", X.shape)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42,stratify=y)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 0.1, random_state = 42,stratify=y_train)
 
-
+scaler = MinMaxScaler()#StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+X_val = scaler.transform(X_val)
 '''START Grid Search for best parameters'''
 
 # list_alpha = np.arange(1/100000, 10, 0.1)
@@ -143,7 +147,7 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 
 
 #=============== Training START =====================
 
-clf2_mean = naive_bayes.ComplementNB(alpha=1e-05).fit(X_train,y_train)
+clf2_mean = naive_bayes.ComplementNB(alpha=2.40).fit(X_train,y_train)
 y_pred2 = clf2_mean.predict(X_val)
 predicted_prob2 = clf2_mean.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred2)
@@ -162,7 +166,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
 # for BMI mean and without chi2{'C': 3000, 'gamma': 'scale', 'kernel': 'rbf'}
-clf1_mean = svm.SVC(kernel='rbf',C=1.5,gamma='auto',probability=True).fit(X_train,y_train)
+clf1_mean = svm.SVC(kernel='rbf',C=2000,gamma='scale',probability=True).fit(X_train,y_train)
 y_pred = clf1_mean.predict(X_val)
 predicted_prob1 = clf1_mean.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -199,7 +203,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
 #for BMI mean and without chi2 {'learning_rate': 0.1, 'max_depth': 10, 'n_estimators': 500}
-clf_mean = GradientBoostingClassifier(n_estimators=500, learning_rate=1, loss = 'exponential', max_depth=10).fit(X_train, y_train)
+clf_mean = GradientBoostingClassifier(n_estimators=300, learning_rate=1, loss = 'exponential', max_depth=10).fit(X_train, y_train)
 y_pred = clf_mean.predict(X_val)
 predicted_prob = clf_mean.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -218,7 +222,7 @@ plt.show()
 
 #==============================================================================
 # for BMI mean and without chi2 {'n_estimators': 200}
-forest_mean = RandomForestClassifier(n_estimators = 300).fit(X_train,y_train)
+forest_mean = RandomForestClassifier(n_estimators = 500).fit(X_train,y_train)
 y_pred4 = forest_mean.predict(X_val)
 predicted_prob4 = forest_mean.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred4)
@@ -253,7 +257,7 @@ for clf, label in zip([clf1_mean, clf2_mean,clf3_mean,clf_mean,forest_mean],
     print("F1-Score on Test set: %0.3f (+/- %0.3f) [%s]"
           % (scores2Test.mean(), scores2Test.std(), label))
 # ================= Training END =====================================
-
+scalerName = './models/WithoutChi2/scaler_BMI_NoChi2.sav'
 filenameLR_BMI_NoChi2 = './models/WithoutChi2/LR_BMI_NoChi2.sav'
 filenameSVM_BMI_NoChi2 = './models/WithoutChi2/SVM_BMI_NoChi2.sav'
 filenameRF_BMI_NoChi2 = './models/WithoutChi2/RF_BMI_NoChi2.sav'
@@ -262,5 +266,6 @@ filenameNB_BMI_NoChi2 = './models/WithoutChi2/NB_BMI_NoChi2.sav'
 joblib.dump(clf3_mean, filenameLR_BMI_NoChi2)
 joblib.dump(clf1_mean, filenameSVM_BMI_NoChi2)
 joblib.dump(forest_mean, filenameRF_BMI_NoChi2)
-joblib.dump(clf3_mean, filenameGB_BMI_NoChi2)
+joblib.dump(clf_mean, filenameGB_BMI_NoChi2)
 joblib.dump(clf2_mean, filenameNB_BMI_NoChi2)
+joblib.dump(scaler, scalerName)

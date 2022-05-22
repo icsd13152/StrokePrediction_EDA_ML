@@ -11,8 +11,9 @@ from sklearn.feature_selection import SelectKBest, chi2
 # !pip install missingno
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 dataOriginal = pd.read_csv('../Dataset/healthcare-dataset-stroke-data.csv')
 dataOriginal.head(10)
@@ -95,7 +96,10 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 
 print("train: ",X_train.shape)
 print("val: ",X_val.shape)
 print("test: ",X_test.shape)
-
+scaler = MinMaxScaler()#StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+X_val = scaler.transform(X_val)
 '''START Grid Search for best parameters'''
 
 # list_alpha = np.arange(1/100000, 10, 0.1)
@@ -163,7 +167,7 @@ print("test: ",X_test.shape)
 #               'gamma':['scale','auto']
 #
 #               }
-# grid = GridSearchCV(svm.SVC(), param_grid, refit = True, verbose = 2)
+# grid = GridSearchCV(svm.SVC(), param_grid, refit = True, verbose = 0)
 #
 #
 # grid.fit(X_train, y_train)
@@ -178,7 +182,7 @@ print("test: ",X_test.shape)
 
 #=============== Training START =====================
 
-clf2_regre = naive_bayes.ComplementNB(alpha=1e-05).fit(X_train,y_train)
+clf2_regre = naive_bayes.ComplementNB(alpha=9.40).fit(X_train,y_train)
 y_pred2 = clf2_regre.predict(X_val)
 predicted_prob2 = clf2_regre.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred2)
@@ -197,7 +201,7 @@ plt.ylabel('True values', fontsize = 20)
 plt.show()
 #================================================================================
 
-clf1_regre = svm.SVC(kernel='rbf',C=1.5,gamma='auto',probability=True).fit(X_train,y_train)
+clf1_regre = svm.SVC(kernel='rbf',C=1000,gamma='scale',probability=True).fit(X_train,y_train)
 y_pred = clf1_regre.predict(X_val)
 predicted_prob1 = clf1_regre.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred)
@@ -216,7 +220,7 @@ plt.show()
 
 # ================================================================================
 
-clf3_regre = LogisticRegression(solver='lbfgs',C=1,max_iter=200).fit(X_train,y_train)
+clf3_regre = LogisticRegression(solver='newton-cg',C=0.1,max_iter=200).fit(X_train,y_train)
 y_pred3 = clf3_regre.predict(X_val)
 predicted_prob3 = clf3_regre.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred3)
@@ -253,7 +257,7 @@ plt.show()
 
 #==============================================================================
 #for BMI mean and without chi2 {'n_estimators': 200}
-forest_regre = RandomForestClassifier(n_estimators = 200).fit(X_train,y_train)
+forest_regre = RandomForestClassifier(n_estimators = 300).fit(X_train,y_train)
 y_pred4 = forest_regre.predict(X_val)
 predicted_prob4 = forest_regre.predict_proba(X_val)
 m_confusion_test = metrics.confusion_matrix(y_val, y_pred4)
@@ -288,7 +292,7 @@ for clf, label in zip([clf1_regre, clf2_regre,clf3_regre,clf_regre,forest_regre]
     print("F1-Score on Test set: %0.3f (+/- %0.3f) [%s]"
           % (scores2Test.mean(), scores2Test.std(), label))
 # ================= Training END =====================================
-
+scalerName = './models/WithoutChi2/scaler_RERG_NoChi2.sav'
 filenameLR_RERG_NoChi2 = './models/WithoutChi2/LR_RERG_NoChi2.sav'
 filenameSVM_RERG_NoChi2 = './models/WithoutChi2/SVM_RERG_NoChi2.sav'
 filenameRF_RERG_NoChi2 = './models/WithoutChi2/RF_RERG_NoChi2.sav'
@@ -299,3 +303,4 @@ joblib.dump(clf1_regre, filenameSVM_RERG_NoChi2)
 joblib.dump(forest_regre, filenameRF_RERG_NoChi2)
 joblib.dump(clf_regre, filenameGB_RERG_NoChi2)
 joblib.dump(clf2_regre, filenameNB_RERG_NoChi2)
+joblib.dump(scaler, scalerName)
