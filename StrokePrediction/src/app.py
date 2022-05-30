@@ -18,7 +18,7 @@ import joblib
 
 # Load model
 current_folder = os.path.dirname(__file__)
-hd_model_obj = joblib.load('./models/WithoutChi2/GB_BMI_NoChi2.sav')
+hd_model_obj = joblib.load('./models/WithoutChi2/GB_BMI_NoChi2_noscaler.sav')
 scaler = joblib.load('./models/WithoutChi2/scaler_BMI_NoChi2.sav')
 hdpred_model = hd_model_obj
 hd_pipeline = []
@@ -279,13 +279,13 @@ def predict_hd_summary(data_patient):
 
     # read in data and predict likelihood of heart disease
     x_new = pd.read_json(data_patient)
-    x_new2 = scaler.transform(x_new)
-    print(x_new2)
-    pred = hdpred_model.predict(x_new2)
+    # x_new2 = scaler.transform(x_new)
+    print(x_new)
+    pred = hdpred_model.predict(x_new)
     print(pred)
-    y_val = hdpred_model.predict_proba(x_new2)[:,1]*100
+    y_val = hdpred_model.predict_proba(x_new)[:,1]*100
     print(y_val)
-    print(hdpred_model.predict_proba(x_new2)*100)
+    # print(hdpred_model.predict_proba(x_new2)*100)
     # maxiY = np.argmax(y_val)
     # y = y_val[maxiY]*100
     text_val = str(np.round(y_val, 1)) + "%"
@@ -385,7 +385,7 @@ def predict_hd_summary(data_patient):
     fig1.update_layout(margin=dict(l=0, r=50, t=10, b=10), xaxis={'range': [0, 100]})
     # do shap value calculations for basic waterfall plot
     explainer_patient = shap.TreeExplainer(hdpred_model)
-    shap_values_patient = explainer_patient.shap_values(x_new2)
+    shap_values_patient = explainer_patient.shap_values(x_new)
 
     updated_fnames = x_new.T.reset_index()
 
@@ -485,7 +485,7 @@ def predict_hd_summary(data_patient):
         showarrow=False,
         font=dict(color="black", size=14)
     )
-    x_new2 = pd.DataFrame()
+    # x_new2 = pd.DataFrame()
     x_new = pd.DataFrame()
     return fig1, \
            f"Based on the patient's profile, the predicted likelihood of Stroke is {text_val}. " \

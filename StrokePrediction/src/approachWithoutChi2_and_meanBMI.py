@@ -61,10 +61,15 @@ print("Total: ", X.shape)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42,stratify=y)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = 0.1, random_state = 42,stratify=y_train)
 
+# np.save('testsetX_as_nparray.npy',X_test)
+# np.save('testsetY_as_nparray.npy',y_test)
+
 scaler = MinMaxScaler()#StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 X_val = scaler.transform(X_val)
+
+
 '''START Grid Search for best parameters'''
 
 # list_alpha = np.arange(1/100000, 10, 0.1)
