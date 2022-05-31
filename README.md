@@ -9,7 +9,7 @@ occurring. There is also a Mockup from the creation of the corresponding applica
 results from EDA procedure.
 
 ## Dataset
-The Data, for this project, were collected from Kaggle in csv format and they are annotated.
+The Data, for this project, were collected from Kaggle in csv format and they are annotated. https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset
 
 ## Jupyter Notebook
 
